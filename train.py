@@ -29,7 +29,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from torch.utils.data import Dataset, DataLoader
-from torch.cuda.amp import GradScaler, autocast
+from torch.amp import GradScaler, autocast
 from torch.optim import AdamW
 from torch.optim.lr_scheduler import CosineAnnealingWarmRestarts
 
@@ -185,9 +185,22 @@ class VesuviusDataset(Dataset):
         
         # Load CSV
         self.df = pd.read_csv(csv_file)
-        self.image_ids = self.df['id'].tolist()
+        all_ids = self.df['id'].tolist()
         
-        print(f"Loaded {len(self.image_ids)} volumes")
+        # Filter to only include IDs where both image and label files exist
+        self.image_ids = []
+        missing_count = 0
+        for img_id in all_ids:
+            image_path = self.image_dir / f"{img_id}.tif"
+            label_path = self.label_dir / f"{img_id}.tif"
+            if image_path.exists() and label_path.exists():
+                self.image_ids.append(img_id)
+            else:
+                missing_count += 1
+        
+        print(f"Found {len(self.image_ids)} volumes with both image and label")
+        if missing_count > 0:
+            print(f"Skipped {missing_count} IDs with missing files")
     
     def __len__(self):
         if self.is_train:
@@ -696,7 +709,7 @@ def train_one_epoch(
         
         optimizer.zero_grad()
         
-        with autocast():
+        with autocast('cuda'):
             if deep_supervision:
                 outputs = model(images)
                 if isinstance(outputs, tuple):
@@ -888,7 +901,7 @@ def main(args):
     )
     
     # Mixed precision scaler
-    scaler = GradScaler()
+    scaler = GradScaler('cuda')
     
     # Create output directory
     output_dir = Path(args.output_dir)
