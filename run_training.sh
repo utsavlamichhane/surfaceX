@@ -37,15 +37,40 @@ echo "=============================================="
 
 # Check dependencies first
 echo "Checking dependencies..."
-echo "PYTHONPATH set to prioritize user packages"
-python3 -c "import typing_extensions; print(f'typing_extensions version: {typing_extensions.__version__}')" || {
-    echo "ERROR: typing_extensions not found or outdated"
-    echo "Please run: pip install --user --upgrade 'typing_extensions>=4.12.0'"
+echo "PYTHONPATH: $PYTHONPATH"
+
+# Debug: Find where typing_extensions is being loaded from
+python3 -c "
+import sys
+# Ensure user packages come first
+user_site = '$HOME/.local/lib/python3.10/site-packages'
+if user_site not in sys.path:
+    sys.path.insert(0, user_site)
+
+import typing_extensions
+print(f'typing_extensions loaded from: {typing_extensions.__file__}')
+print(f'typing_extensions version: {getattr(typing_extensions, \"__version__\", \"unknown\")}')
+" || {
+    echo "ERROR: typing_extensions import failed"
+    echo "Please run: pip install --user --upgrade --force-reinstall 'typing_extensions>=4.12.0'"
     exit 1
 }
 
-# Check if GPU is available
-python3 -c "import torch; print(f'CUDA Available: {torch.cuda.is_available()}'); print(f'GPU: {torch.cuda.get_device_name(0) if torch.cuda.is_available() else \"None\"}')"
+# Try importing torch directly
+echo "Testing PyTorch import..."
+python3 -c "
+import sys
+sys.path.insert(0, '$HOME/.local/lib/python3.10/site-packages')
+import torch
+print(f'PyTorch version: {torch.__version__}')
+print(f'CUDA available: {torch.cuda.is_available()}')
+if torch.cuda.is_available():
+    print(f'GPU: {torch.cuda.get_device_name(0)}')
+" || {
+    echo "ERROR: PyTorch import failed"
+    echo "Please check your PyTorch installation"
+    exit 1
+}
 
 # Strategy 1: Train Attention UNet with different seeds for ensemble
 echo ""
