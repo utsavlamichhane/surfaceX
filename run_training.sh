@@ -5,10 +5,10 @@
 set -e
 
 # Configuration
-EPOCHS=100
+EPOCHS=200
 BATCH_SIZE=2
 NUM_WORKERS=4
-BASE_CHANNELS=32
+BASE_CHANNELS=64
 LR=1e-4
 
 # Directory structure (adjust if needed)
