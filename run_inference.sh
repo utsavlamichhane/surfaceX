@@ -4,6 +4,12 @@
 
 set -e
 
+# ============================================
+# IMPORTANT: Prioritize user-installed packages
+# This fixes conflicts with system packages on HPC
+# ============================================
+export PYTHONPATH="$HOME/.local/lib/python3.10/site-packages:$PYTHONPATH"
+
 # Configuration
 TEST_IMAGES="test_images"
 TEST_CSV="test.csv"

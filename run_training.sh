@@ -4,6 +4,12 @@
 
 set -e
 
+# ============================================
+# IMPORTANT: Prioritize user-installed packages
+# This fixes conflicts with system packages on HPC
+# ============================================
+export PYTHONPATH="$HOME/.local/lib/python3.10/site-packages:$PYTHONPATH"
+
 # Configuration
 EPOCHS=200
 BATCH_SIZE=2
@@ -31,7 +37,8 @@ echo "=============================================="
 
 # Check dependencies first
 echo "Checking dependencies..."
-python3 -c "import typing_extensions; print(f'typing_extensions version: {typing_extensions.__version__}')" 2>/dev/null || {
+echo "PYTHONPATH set to prioritize user packages"
+python3 -c "import typing_extensions; print(f'typing_extensions version: {typing_extensions.__version__}')" || {
     echo "ERROR: typing_extensions not found or outdated"
     echo "Please run: pip install --user --upgrade 'typing_extensions>=4.12.0'"
     exit 1
