@@ -17,14 +17,20 @@ NUM_WORKERS=4
 BASE_CHANNELS=64
 LR=1e-4
 
-# Directory structure (adjust if needed)
+# Directory structure
+# Source data in current directory
 TRAIN_IMAGES="train_images"
 TRAIN_LABELS="train_labels"
 TRAIN_CSV="train.csv"
-OUTPUT_DIR="checkpoints"
 
-# Create output directory
+# Intermediate files go to scratch (faster I/O, more space)
+SCRATCH_DIR="/scratch/$USER/vesuvius"
+OUTPUT_DIR="${SCRATCH_DIR}/checkpoints"
+
+# Create directories
 mkdir -p $OUTPUT_DIR
+echo "Scratch directory: $SCRATCH_DIR"
+echo "Checkpoints will be saved to: $OUTPUT_DIR"
 
 echo "=============================================="
 echo "Vesuvius Challenge - Training Pipeline"
