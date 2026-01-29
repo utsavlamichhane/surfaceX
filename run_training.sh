@@ -29,6 +29,14 @@ echo "Train CSV: $TRAIN_CSV"
 echo "Output: $OUTPUT_DIR"
 echo "=============================================="
 
+# Check dependencies first
+echo "Checking dependencies..."
+python3 -c "import typing_extensions; print(f'typing_extensions version: {typing_extensions.__version__}')" 2>/dev/null || {
+    echo "ERROR: typing_extensions not found or outdated"
+    echo "Please run: pip install --user --upgrade 'typing_extensions>=4.12.0'"
+    exit 1
+}
+
 # Check if GPU is available
 python3 -c "import torch; print(f'CUDA Available: {torch.cuda.is_available()}'); print(f'GPU: {torch.cuda.get_device_name(0) if torch.cuda.is_available() else \"None\"}')"
 

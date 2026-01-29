@@ -1,5 +1,8 @@
 # Vesuvius Challenge Surface Detection - Requirements
 
+# Fix for typing_extensions conflict (must be first)
+typing_extensions>=4.12.0
+
 # Core ML
 torch>=2.0.0
 torchvision>=0.15.0
