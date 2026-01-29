@@ -35,40 +35,24 @@ echo "Train CSV: $TRAIN_CSV"
 echo "Output: $OUTPUT_DIR"
 echo "=============================================="
 
-# Check dependencies first
+# Check dependencies - just try importing torch directly
 echo "Checking dependencies..."
-echo "PYTHONPATH: $PYTHONPATH"
-
-# Debug: Find where typing_extensions is being loaded from
-python3 -c "
-import sys
-# Ensure user packages come first
-user_site = '$HOME/.local/lib/python3.10/site-packages'
-if user_site not in sys.path:
-    sys.path.insert(0, user_site)
-
-import typing_extensions
-print(f'typing_extensions loaded from: {typing_extensions.__file__}')
-print(f'typing_extensions version: {getattr(typing_extensions, \"__version__\", \"unknown\")}')
-" || {
-    echo "ERROR: typing_extensions import failed"
-    echo "Please run: pip install --user --upgrade --force-reinstall 'typing_extensions>=4.12.0'"
-    exit 1
-}
-
-# Try importing torch directly
 echo "Testing PyTorch import..."
 python3 -c "
-import sys
-sys.path.insert(0, '$HOME/.local/lib/python3.10/site-packages')
 import torch
 print(f'PyTorch version: {torch.__version__}')
 print(f'CUDA available: {torch.cuda.is_available()}')
 if torch.cuda.is_available():
     print(f'GPU: {torch.cuda.get_device_name(0)}')
+    print(f'GPU Memory: {torch.cuda.get_device_properties(0).total_memory / 1e9:.1f} GB')
 " || {
     echo "ERROR: PyTorch import failed"
-    echo "Please check your PyTorch installation"
+    echo ""
+    echo "This is likely due to typing_extensions conflict."
+    echo "Try running with explicit path:"
+    echo ""
+    echo "  PYTHONPATH=\$HOME/.local/lib/python3.10/site-packages:\$PYTHONPATH python3 train.py --help"
+    echo ""
     exit 1
 }
 
